@@ -1,0 +1,11 @@
+# Docker compose to have Zookeeper, Kafka, and Kafka Manager running for development.
+# Provided by @chris-zen
+
+kafka-manager:
+  image: sheepkiller/kafka-manager:latest
+  ports:
+    - "9000:9000"
+  environment:
+    ZK_HOSTS: 192.168.128.135:2181,192.168.128.136:2181,192.168.128.137:2181
+    APPLICATION_SECRET: letmein
+    KM_ARGS: -Djava.net.preferIPv4Stack=true
