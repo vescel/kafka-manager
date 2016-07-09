@@ -1,39 +1,38 @@
-# kafka manager Dockerfile
-[kafka manager](https://github.com/yahoo/kafka-manager) is a tool from Yahoo Inc. for managing [Apache Kafka](http://kafka.apache.org).
-## Base Docker Image ##
-* [centos:7](https://hub.docker.com/_/centos/)
+# vescel/kafka-manager: dockerized kafka-manager for Joyent Triton
+vescel/kafka-manager is a dockerized [kafka-manager](https://github.com/yahoo/kafka-manager) installation for the [Joyent Triton Containers as a Service](https://www.joyent.com/triton) platform that makes use of [Joyent's ContainerPilot](https://www.joyent.com/containerpilot) for container scheduling.
 
-## Howto
-### Quick Start
-```
-docker run -it --rm  -p 9000:9000 -e ZK_HOSTS="your-zk.domain:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
-```
-(if you don't define ZK_HOSTS, default value has been set to "localhost:2181")
+The vescel/kafka-manager container has an automated build available on [dockerhub](https://hub.docker.com/r/kafka-manager)
 
+For detail usage (including zookeeper and kafka) visit https://github.com/vescel/platform
 
-### Use your own configuration file
-Until 1.3.0.4, you were able to override default configuration file via a docker volume to overi:
-```
-docker run [...] -v /path/to/confdir:/kafka-manager-${KM_VERSION}/conf [...]
-```
-From > 1.3.0.4, you can specify a configuration file via an environment variable.
-```
-docker run [...] -v /path/to/confdir:/opt -e KM_CONFIG=/opt/my_shiny.conf sheepkiller/kafka-manager
-```
+## How-to
+### local machine prerequsites
+#### Mac OSX
+[docker toolbox](https://www.docker.com/products/docker-toolbox) must be installed. Docker for Mac is still fresh, and I haven't had a chance to work out the network bugs yet, so stick with docker toolbox for now.
 
-### Pass arguments to kafka-manager
-For release <= 1.3.0.4, you can pass options via command/args.
+### Mac OSX Quick Start
+ContainerPilot assumes a dockerized [hashicorp consul](https://www.consul.io/) be running. I use [progrium/consul](https://hub.docker.com/r/progrium/consul/) using the following command:
+
 ```
-docker run -it --rm  -p 9000:9000 -e ZK_HOSTS="your-zk.domain:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager -Djava.net.preferIPv4Stack=true
+docker run -p 8400:8400 -p 8500:8500 -p 8600:53/udp -h node1 progrium/consul -server -bootstrap -ui-dir /ui
 ```
-For release > 1.3.0.4, you can use env variable `KM_ARGS`.
+This command will launch a single consul instance (sufficient for development) that will have the consul UI available on port 8500 of the local machine at: 
+
 ```
-docker run -it --rm  -p 9000:9000 -e ZK_HOSTS="your-zk.domain:2181" -e APPLICATION_SECRET=letmein -e KM_ARGS=-Djava.net.preferIPv4Stack=true sheepkiller/kafka-manager 
+docker-machine ip default
 ```
 
-### Specify a revision
-If you want to upgrade/downgrade this Dockerfile, edit it and set `KM_VERSION` and `KM_REVISION` to fetch the release from github.
+Clone this repository to your local machine. cd into vescel/kafka-manager and run the following command to create the required ENV file
+
+```
+./env.sh local
+```
+
+Confirm that a file with name _env exists in the local directory, then run:
+
+```
+docker-compose up
+```
+Which creates a single instance of kafka-manager, available on port 9000.
 
 
-## ToDo
-- don't run kafka-manager as root
